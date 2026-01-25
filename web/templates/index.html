@@ -1,0 +1,1002 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div id="app-container">
+    <!-- ナビゲーションバー -->
+    <nav id="nav-bar">
+        <button class="nav-item active" data-tab="home">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-label">ホーム</span>
+        </button>
+        <button class="nav-item" data-tab="groups">
+            <span class="nav-icon">👥</span>
+            <span class="nav-label">グループ</span>
+        </button>
+        <button class="nav-item" data-tab="dms">
+            <span class="nav-icon">💬</span>
+            <span class="nav-label">DM</span>
+        </button>
+        <button class="nav-item" data-tab="account">
+            <span class="nav-icon">👤</span>
+            <span class="nav-label">アカウント</span>
+        </button>
+    </nav>
+
+    <!-- ホームタブ -->
+    <div id="home-tab" class="tab-content active">
+        <div class="tab-header">
+            <h1>ホーム</h1>
+            <button id="settings-btn-home" class="icon-btn">⚙️</button>
+        </div>
+        <div class="home-content">
+            <div class="welcome-section">
+                <p class="welcome-label">おかえりなさい</p>
+                <h2 id="welcome-name">ゲスト</h2>
+            </div>
+            <div class="recent-section">
+                <h3>最近のチャット</h3>
+                <div id="recent-chats" class="chat-list">
+                    <div class="empty-list">読み込み中...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- グループタブ -->
+    <div id="groups-tab" class="tab-content">
+        <!-- グループリスト画面 -->
+        <div id="group-list-view" class="chat-view active">
+            <div class="tab-header">
+                <h1>グループチャット</h1>
+            </div>
+            <div class="chat-list-actions">
+                <button class="action-btn primary" id="create-group-btn">+ グループ作成</button>
+                <button class="action-btn secondary" id="join-group-btn">コードで参加</button>
+            </div>
+            <div id="group-list" class="chat-list">
+                <!-- グループリストがここに表示 -->
+            </div>
+        </div>
+
+        <!-- グループチャットルーム画面 -->
+        <div id="group-room-view" class="chat-view">
+            <div class="tab-header with-back">
+                <button class="back-btn" id="back-from-group-room">←</button>
+                <h1 id="group-room-title">チャット</h1>
+                <button class="icon-btn" id="group-settings-btn">☰</button>
+            </div>
+            <div id="group-messages-container" class="messages-container">
+            </div>
+            <form id="group-post-form" class="post-form">
+                <textarea id="group-message-text" placeholder="メッセージを入力..."></textarea>
+                <button type="submit" id="group-send-button" disabled>送信</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- DMタブ -->
+    <div id="dms-tab" class="tab-content">
+        <!-- DMリスト画面 -->
+        <div id="dm-list-view" class="chat-view active">
+            <div class="tab-header">
+                <h1>ダイレクトメッセージ</h1>
+            </div>
+            <div class="chat-list-actions">
+                <button class="action-btn primary" id="new-dm-btn">+ 新規DM</button>
+            </div>
+            <div id="dm-list" class="chat-list">
+                <!-- DMリストがここに表示 -->
+            </div>
+        </div>
+
+        <!-- DMチャットルーム画面 -->
+        <div id="dm-room-view" class="chat-view">
+            <div class="tab-header with-back">
+                <button class="back-btn" id="back-from-dm-room">←</button>
+                <h1 id="dm-room-title">チャット</h1>
+                <button class="icon-btn" id="dm-settings-btn">☰</button>
+            </div>
+            <div id="dm-messages-container" class="messages-container">
+            </div>
+            <form id="dm-post-form" class="post-form">
+                <textarea id="dm-message-text" placeholder="メッセージを入力..."></textarea>
+                <button type="submit" id="dm-send-button" disabled>送信</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- アカウントタブ -->
+    <div id="account-tab" class="tab-content">
+        <div class="tab-header">
+            <h1>アカウント</h1>
+            <button id="settings-btn-account" class="icon-btn">⚙️</button>
+        </div>
+        <div class="account-content">
+            <div class="account-section">
+                <h3>ユーザー情報</h3>
+                <div class="account-row">
+                    <span class="account-label">メールアドレス</span>
+                    <span id="user-email" class="account-value">-</span>
+                </div>
+                <div class="account-row">
+                    <span class="account-label">表示名</span>
+                    <span id="user-display-name" class="account-value">未設定</span>
+                    <button id="edit-display-name-btn" class="edit-btn">✏️</button>
+                </div>
+            </div>
+            <div class="account-section">
+                <h3>アカウント操作</h3>
+                <button id="reset-password-btn" class="account-btn primary">
+                    パスワードをリセットする
+                </button>
+            </div>
+            <div class="account-section">
+                <button id="logout-btn" class="account-btn danger">
+                    ログアウト
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="login-prompt" style="display: none; text-align: center; padding: 40px;">
+    <h1>Welcome</h1>
+    <p>Please <a href="{{ url_for('login') }}">login</a> to view the bulletin board.</p>
+</div>
+
+<!-- モーダル: グループ作成 -->
+<div id="create-group-modal" class="modal">
+    <div class="modal-content">
+        <h3>グループ作成</h3>
+        <input type="text" id="group-name-input" placeholder="グループ名を入力" maxlength="30">
+        <div class="modal-buttons">
+            <button id="cancel-create-group" class="modal-btn secondary">キャンセル</button>
+            <button id="confirm-create-group" class="modal-btn primary">作成</button>
+        </div>
+    </div>
+</div>
+
+<!-- モーダル: グループ参加 -->
+<div id="join-group-modal" class="modal">
+    <div class="modal-content">
+        <h3>コードで参加</h3>
+        <input type="text" id="group-code-input" placeholder="10文字のコードを入力" maxlength="10">
+        <div class="modal-buttons">
+            <button id="cancel-join-group" class="modal-btn secondary">キャンセル</button>
+            <button id="confirm-join-group" class="modal-btn primary">参加</button>
+        </div>
+    </div>
+</div>
+
+<!-- モーダル: 新規DM -->
+<div id="new-dm-modal" class="modal">
+    <div class="modal-content">
+        <h3>新規DM</h3>
+        <input type="email" id="dm-email-input" placeholder="相手のメールアドレス">
+        <div class="modal-buttons">
+            <button id="cancel-new-dm" class="modal-btn secondary">キャンセル</button>
+            <button id="confirm-new-dm" class="modal-btn primary">開始</button>
+        </div>
+    </div>
+</div>
+
+<!-- モーダル: 表示名編集 -->
+<div id="edit-name-modal" class="modal">
+    <div class="modal-content">
+        <h3>表示名を編集</h3>
+        <input type="text" id="new-display-name-input" placeholder="表示名を入力" maxlength="30">
+        <div class="modal-buttons">
+            <button id="cancel-edit-name" class="modal-btn secondary">キャンセル</button>
+            <button id="confirm-edit-name" class="modal-btn primary">保存</button>
+        </div>
+    </div>
+</div>
+
+<!-- モーダル: 設定 -->
+<div id="settings-modal" class="modal">
+    <div class="modal-content settings-content">
+        <h3>設定</h3>
+        <div class="settings-section">
+            <label>テーマ</label>
+            <select id="theme-select">
+                <option value="system">システム設定</option>
+                <option value="light">ライト（白）</option>
+                <option value="dark">ダーク（黒）</option>
+            </select>
+        </div>
+        <div class="modal-buttons">
+            <button id="close-settings" class="modal-btn primary">完了</button>
+        </div>
+    </div>
+</div>
+
+<!-- モーダル: チャット設定 -->
+<div id="chat-settings-modal" class="modal">
+    <div class="modal-content settings-content">
+        <h3>チャット設定</h3>
+        <div id="chat-info-section" class="settings-section">
+            <label>チャット名</label>
+            <span id="chat-settings-name">-</span>
+        </div>
+        <div id="chat-code-section" class="settings-section" style="display: none;">
+            <label>参加コード</label>
+            <div class="code-row">
+                <span id="chat-settings-code">-</span>
+                <button id="regenerate-code-btn" class="edit-btn">🔄</button>
+            </div>
+        </div>
+        <div class="settings-section">
+            <label>背景色</label>
+            <select id="bg-color-select">
+                <option value="default">デフォルト</option>
+                <option value="blue">ブルー</option>
+                <option value="purple">パープル</option>
+                <option value="green">グリーン</option>
+                <option value="orange">オレンジ</option>
+                <option value="pink">ピンク</option>
+                <option value="gray">グレー</option>
+            </select>
+        </div>
+        <div class="settings-section">
+            <label>ニックネーム</label>
+            <div class="nickname-row">
+                <span id="current-nickname">未設定</span>
+                <button id="edit-nickname-btn" class="edit-btn">✏️</button>
+            </div>
+            <button id="reset-nickname-btn" class="link-btn danger" style="display: none;">ニックネームをリセット</button>
+        </div>
+        <div class="modal-buttons">
+            <button id="close-chat-settings" class="modal-btn primary">完了</button>
+        </div>
+    </div>
+</div>
+
+<!-- モーダル: ニックネーム編集 -->
+<div id="edit-nickname-modal" class="modal">
+    <div class="modal-content">
+        <h3>ニックネームを編集</h3>
+        <input type="text" id="new-nickname-input" placeholder="ニックネームを入力" maxlength="30">
+        <div class="modal-buttons">
+            <button id="cancel-edit-nickname" class="modal-btn secondary">キャンセル</button>
+            <button id="confirm-edit-nickname" class="modal-btn primary">保存</button>
+        </div>
+    </div>
+</div>
+
+<!-- アラートモーダル -->
+<div id="alert-modal" class="modal">
+    <div class="modal-content">
+        <h3 id="alert-title">お知らせ</h3>
+        <p id="alert-message"></p>
+        <button id="alert-ok-btn" class="modal-btn primary">OK</button>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+<script type="module">
+    import { getAuth, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, collection, addDoc, doc, getDoc, setDoc, getDocs, updateDoc, arrayUnion, query, orderBy, where, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const auth = getAuth();
+    const db = getFirestore();
+
+    // State
+    let currentChatId = null;
+    let currentChatType = null;
+    let currentChatName = null;
+    let currentChatCode = null;
+    let messagesUnsubscribe = null;
+    let userProfile = { displayName: '', nicknames: {}, chatBackgrounds: {} };
+
+    // DOM Elements
+    const appContainer = document.getElementById('app-container');
+    const loginPrompt = document.getElementById('login-prompt');
+    const navItems = document.querySelectorAll('.nav-item');
+    const tabContents = document.querySelectorAll('.tab-content');
+    const userEmailEl = document.getElementById('user-email');
+    const welcomeNameEl = document.getElementById('welcome-name');
+    const userDisplayNameEl = document.getElementById('user-display-name');
+
+    // --- Theme Management ---
+    function applyTheme(theme) {
+        if (theme === 'dark') {
+            document.body.classList.add('dark-theme');
+            document.body.classList.remove('light-theme');
+        } else if (theme === 'light') {
+            document.body.classList.remove('dark-theme');
+            document.body.classList.add('light-theme');
+        } else {
+            document.body.classList.remove('dark-theme', 'light-theme');
+        }
+        localStorage.setItem('appTheme', theme);
+    }
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('appTheme') || 'system';
+    document.getElementById('theme-select').value = savedTheme;
+    applyTheme(savedTheme);
+
+    document.getElementById('theme-select').addEventListener('change', (e) => {
+        applyTheme(e.target.value);
+    });
+
+    // --- User Profile Management ---
+    async function loadUserProfile() {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        try {
+            const userDoc = await getDoc(doc(db, 'users', user.uid));
+            if (userDoc.exists()) {
+                userProfile = userDoc.data();
+            }
+            updateDisplayNames();
+        } catch (error) {
+            console.error('Error loading profile:', error);
+        }
+    }
+
+    async function saveUserProfile(data) {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        try {
+            await setDoc(doc(db, 'users', user.uid), {
+                ...userProfile,
+                ...data,
+                email: user.email
+            }, { merge: true });
+            Object.assign(userProfile, data);
+            updateDisplayNames();
+        } catch (error) {
+            console.error('Error saving profile:', error);
+        }
+    }
+
+    function updateDisplayNames() {
+        const user = auth.currentUser;
+        const displayName = userProfile.displayName || user?.email?.split('@')[0] || 'ゲスト';
+        welcomeNameEl.textContent = displayName;
+        userDisplayNameEl.textContent = userProfile.displayName || '未設定';
+    }
+
+    function getDisplayName(email) {
+        const emailLower = email.toLowerCase();
+        // Check nickname first
+        if (userProfile.nicknames && userProfile.nicknames[emailLower]) {
+            return userProfile.nicknames[emailLower];
+        }
+        // Return email prefix
+        return email.split('@')[0];
+    }
+
+    // --- Tab Navigation ---
+    navItems.forEach(item => {
+        item.addEventListener('click', () => {
+            const tabId = item.dataset.tab;
+            navItems.forEach(nav => nav.classList.remove('active'));
+            item.classList.add('active');
+            tabContents.forEach(content => content.classList.remove('active'));
+            document.getElementById(`${tabId}-tab`).classList.add('active');
+
+            // Load data when switching tabs
+            if (tabId === 'groups') {
+                showGroupView('group-list-view');
+                loadGroups();
+            } else if (tabId === 'dms') {
+                showDmView('dm-list-view');
+                loadDMs();
+            } else if (tabId === 'home') {
+                loadRecentChats();
+            }
+        });
+    });
+
+    // --- Chat View Navigation ---
+    function showGroupView(viewId) {
+        document.querySelectorAll('#groups-tab .chat-view').forEach(v => v.classList.remove('active'));
+        document.getElementById(viewId).classList.add('active');
+    }
+
+    function showDmView(viewId) {
+        document.querySelectorAll('#dms-tab .chat-view').forEach(v => v.classList.remove('active'));
+        document.getElementById(viewId).classList.add('active');
+    }
+
+    // Back buttons
+    document.getElementById('back-from-group-room').addEventListener('click', () => {
+        if (messagesUnsubscribe) messagesUnsubscribe();
+        showGroupView('group-list-view');
+    });
+
+    document.getElementById('back-from-dm-room').addEventListener('click', () => {
+        if (messagesUnsubscribe) messagesUnsubscribe();
+        showDmView('dm-list-view');
+    });
+
+    // --- Settings Modal ---
+    document.getElementById('settings-btn-home').addEventListener('click', () => {
+        document.getElementById('settings-modal').style.display = 'flex';
+    });
+    document.getElementById('settings-btn-account').addEventListener('click', () => {
+        document.getElementById('settings-modal').style.display = 'flex';
+    });
+    document.getElementById('close-settings').addEventListener('click', () => {
+        document.getElementById('settings-modal').style.display = 'none';
+    });
+
+    // --- Chat Settings Modal ---
+    function openChatSettings() {
+        document.getElementById('chat-settings-name').textContent = currentChatName;
+        
+        if (currentChatType === 'group' && currentChatCode) {
+            document.getElementById('chat-code-section').style.display = 'block';
+            document.getElementById('chat-settings-code').textContent = currentChatCode;
+        } else {
+            document.getElementById('chat-code-section').style.display = 'none';
+        }
+
+        // Load background
+        const bgKey = currentChatId;
+        const savedBg = userProfile.chatBackgrounds?.[bgKey] || 'default';
+        document.getElementById('bg-color-select').value = savedBg;
+
+        // Load nickname
+        const nicknameKey = currentChatType === 'group' ? currentChatId : currentChatName.toLowerCase();
+        const nickname = userProfile.nicknames?.[nicknameKey] || '';
+        document.getElementById('current-nickname').textContent = nickname || '未設定';
+        document.getElementById('reset-nickname-btn').style.display = nickname ? 'inline-block' : 'none';
+
+        document.getElementById('chat-settings-modal').style.display = 'flex';
+    }
+
+    document.getElementById('group-settings-btn').addEventListener('click', openChatSettings);
+    document.getElementById('dm-settings-btn').addEventListener('click', openChatSettings);
+    document.getElementById('close-chat-settings').addEventListener('click', () => {
+        document.getElementById('chat-settings-modal').style.display = 'none';
+    });
+
+    // Background color change
+    document.getElementById('bg-color-select').addEventListener('change', (e) => {
+        const color = e.target.value;
+        const bgKey = currentChatId;
+        const newBackgrounds = { ...userProfile.chatBackgrounds, [bgKey]: color };
+        saveUserProfile({ chatBackgrounds: newBackgrounds });
+        applyMessageBackground(color);
+    });
+
+    function applyMessageBackground(color) {
+        const containers = [
+            document.getElementById('group-messages-container'),
+            document.getElementById('dm-messages-container')
+        ];
+        containers.forEach(container => {
+            container.className = 'messages-container';
+            if (color && color !== 'default') {
+                container.classList.add(`bg-${color}`);
+            }
+        });
+    }
+
+    // --- Regenerate Code ---
+    document.getElementById('regenerate-code-btn').addEventListener('click', async () => {
+        if (!currentChatId || currentChatType !== 'group') return;
+        
+        if (!confirm('現在のコードは使用できなくなります。新しいコードを発行しますか？')) return;
+
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let newCode = '';
+        for (let i = 0; i < 10; i++) {
+            newCode += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+
+        try {
+            await updateDoc(doc(db, 'chats', currentChatId), { code: newCode });
+            currentChatCode = newCode;
+            document.getElementById('chat-settings-code').textContent = newCode;
+            showAlert('新しいコードを発行しました: ' + newCode);
+        } catch (error) {
+            showAlert('エラー: ' + error.message);
+        }
+    });
+
+    // --- Nickname ---
+    document.getElementById('edit-nickname-btn').addEventListener('click', () => {
+        const nicknameKey = currentChatType === 'group' ? currentChatId : currentChatName.toLowerCase();
+        document.getElementById('new-nickname-input').value = userProfile.nicknames?.[nicknameKey] || '';
+        document.getElementById('edit-nickname-modal').style.display = 'flex';
+    });
+
+    document.getElementById('cancel-edit-nickname').addEventListener('click', () => {
+        document.getElementById('edit-nickname-modal').style.display = 'none';
+    });
+
+    document.getElementById('confirm-edit-nickname').addEventListener('click', async () => {
+        const nickname = document.getElementById('new-nickname-input').value.trim();
+        const nicknameKey = currentChatType === 'group' ? currentChatId : currentChatName.toLowerCase();
+        const newNicknames = { ...userProfile.nicknames, [nicknameKey]: nickname };
+        await saveUserProfile({ nicknames: newNicknames });
+        document.getElementById('current-nickname').textContent = nickname || '未設定';
+        document.getElementById('reset-nickname-btn').style.display = nickname ? 'inline-block' : 'none';
+        document.getElementById('edit-nickname-modal').style.display = 'none';
+    });
+
+    document.getElementById('reset-nickname-btn').addEventListener('click', async () => {
+        const nicknameKey = currentChatType === 'group' ? currentChatId : currentChatName.toLowerCase();
+        const newNicknames = { ...userProfile.nicknames };
+        delete newNicknames[nicknameKey];
+        await saveUserProfile({ nicknames: newNicknames });
+        document.getElementById('current-nickname').textContent = '未設定';
+        document.getElementById('reset-nickname-btn').style.display = 'none';
+    });
+
+    // --- Display Name Edit ---
+    document.getElementById('edit-display-name-btn').addEventListener('click', () => {
+        document.getElementById('new-display-name-input').value = userProfile.displayName || '';
+        document.getElementById('edit-name-modal').style.display = 'flex';
+    });
+
+    document.getElementById('cancel-edit-name').addEventListener('click', () => {
+        document.getElementById('edit-name-modal').style.display = 'none';
+    });
+
+    document.getElementById('confirm-edit-name').addEventListener('click', async () => {
+        const name = document.getElementById('new-display-name-input').value.trim();
+        await saveUserProfile({ displayName: name });
+        document.getElementById('edit-name-modal').style.display = 'none';
+    });
+
+    // --- Alert ---
+    function showAlert(message) {
+        document.getElementById('alert-message').textContent = message;
+        document.getElementById('alert-modal').style.display = 'flex';
+    }
+    document.getElementById('alert-ok-btn').addEventListener('click', () => document.getElementById('alert-modal').style.display = 'none');
+
+    // --- Modal Controls ---
+    document.getElementById('create-group-btn').addEventListener('click', () => {
+        document.getElementById('group-name-input').value = '';
+        document.getElementById('create-group-modal').style.display = 'flex';
+    });
+    document.getElementById('cancel-create-group').addEventListener('click', () => document.getElementById('create-group-modal').style.display = 'none');
+
+    document.getElementById('join-group-btn').addEventListener('click', () => {
+        document.getElementById('group-code-input').value = '';
+        document.getElementById('join-group-modal').style.display = 'flex';
+    });
+    document.getElementById('cancel-join-group').addEventListener('click', () => document.getElementById('join-group-modal').style.display = 'none');
+
+    document.getElementById('new-dm-btn').addEventListener('click', () => {
+        document.getElementById('dm-email-input').value = '';
+        document.getElementById('new-dm-modal').style.display = 'flex';
+    });
+    document.getElementById('cancel-new-dm').addEventListener('click', () => document.getElementById('new-dm-modal').style.display = 'none');
+
+    // --- Generate Random Code ---
+    function generateCode(length = 10) {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let result = '';
+        for (let i = 0; i < length; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
+    }
+
+    // --- Create Group ---
+    document.getElementById('confirm-create-group').addEventListener('click', async () => {
+        const name = document.getElementById('group-name-input').value.trim();
+        if (!name) return showAlert('グループ名を入力してください');
+
+        const user = auth.currentUser;
+        if (!user) return;
+
+        try {
+            const code = generateCode(10);
+            await addDoc(collection(db, 'chats'), {
+                type: 'group',
+                name: name,
+                code: code,
+                members: [user.uid],
+                createdBy: user.uid,
+                createdAt: serverTimestamp()
+            });
+            document.getElementById('create-group-modal').style.display = 'none';
+            showAlert(`グループを作成しました！\n参加コード: ${code}`);
+            loadGroups();
+        } catch (error) {
+            showAlert('エラー: ' + error.message);
+        }
+    });
+
+    // --- Join Group ---
+    document.getElementById('confirm-join-group').addEventListener('click', async () => {
+        const code = document.getElementById('group-code-input').value.trim().toUpperCase();
+        if (code.length !== 10) return showAlert('10文字のコードを入力してください');
+
+        const user = auth.currentUser;
+        if (!user) return;
+
+        try {
+            const q = query(collection(db, 'chats'), where('code', '==', code), where('type', '==', 'group'));
+            const snapshot = await getDocs(q);
+
+            if (snapshot.empty) {
+                return showAlert('グループが見つかりません');
+            }
+
+            const groupDoc = snapshot.docs[0];
+            await updateDoc(doc(db, 'chats', groupDoc.id), {
+                members: arrayUnion(user.uid)
+            });
+            document.getElementById('join-group-modal').style.display = 'none';
+            showAlert('グループに参加しました！');
+            loadGroups();
+        } catch (error) {
+            showAlert('エラー: ' + error.message);
+        }
+    });
+
+    // --- Start DM ---
+    document.getElementById('confirm-new-dm').addEventListener('click', async () => {
+        const email = document.getElementById('dm-email-input').value.trim().toLowerCase();
+        if (!email) return showAlert('メールアドレスを入力してください');
+
+        const user = auth.currentUser;
+        if (!user) return;
+        if (email === user.email.toLowerCase()) return showAlert('自分自身にはDMできません');
+
+        try {
+            const existingQuery = query(
+                collection(db, 'chats'),
+                where('type', '==', 'dm'),
+                where('memberEmails', 'array-contains', user.email.toLowerCase())
+            );
+            const existingDMs = await getDocs(existingQuery);
+
+            for (const dmDoc of existingDMs.docs) {
+                const data = dmDoc.data();
+                if (data.memberEmails && data.memberEmails.includes(email)) {
+                    document.getElementById('new-dm-modal').style.display = 'none';
+                    openDmRoom(dmDoc.id, email);
+                    return;
+                }
+            }
+
+            const newDm = await addDoc(collection(db, 'chats'), {
+                type: 'dm',
+                name: email,
+                memberEmails: [user.email.toLowerCase(), email],
+                members: [user.uid],
+                createdBy: user.uid,
+                createdAt: serverTimestamp()
+            });
+            document.getElementById('new-dm-modal').style.display = 'none';
+            openDmRoom(newDm.id, email);
+        } catch (error) {
+            showAlert('エラー: ' + error.message);
+        }
+    });
+
+    // --- Load Recent Chats ---
+    async function loadRecentChats() {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const recentList = document.getElementById('recent-chats');
+        recentList.innerHTML = '<div class="loading">読み込み中...</div>';
+
+        try {
+            // Load groups
+            const groupQuery = query(
+                collection(db, 'chats'),
+                where('type', '==', 'group'),
+                where('members', 'array-contains', user.uid)
+            );
+            const groupSnapshot = await getDocs(groupQuery);
+
+            // Load DMs
+            const dmQuery = query(
+                collection(db, 'chats'),
+                where('type', '==', 'dm'),
+                where('memberEmails', 'array-contains', user.email.toLowerCase())
+            );
+            const dmSnapshot = await getDocs(dmQuery);
+
+            recentList.innerHTML = '';
+
+            if (groupSnapshot.empty && dmSnapshot.empty) {
+                recentList.innerHTML = '<div class="empty-list">チャットがありません</div>';
+                return;
+            }
+
+            // Show up to 5 chats
+            let count = 0;
+            groupSnapshot.forEach(doc => {
+                if (count >= 5) return;
+                const data = doc.data();
+                addRecentChatItem(recentList, doc.id, data.name, 'group', data.code);
+                count++;
+            });
+
+            dmSnapshot.forEach(doc => {
+                if (count >= 5) return;
+                const data = doc.data();
+                const otherEmail = data.memberEmails.find(e => e !== user.email.toLowerCase()) || '不明';
+                addRecentChatItem(recentList, doc.id, otherEmail, 'dm');
+                count++;
+            });
+        } catch (error) {
+            recentList.innerHTML = '<div class="error">エラーが発生しました</div>';
+        }
+    }
+
+    function addRecentChatItem(container, id, name, type, code = null) {
+        const displayName = getDisplayName(name);
+        const item = document.createElement('div');
+        item.className = 'chat-list-item';
+        item.innerHTML = `
+            <span class="chat-item-icon">${type === 'group' ? '👥' : '💬'}</span>
+            <span class="chat-item-name">${displayName}</span>
+            <span class="chat-item-arrow">→</span>
+        `;
+        item.addEventListener('click', () => {
+            if (type === 'group') {
+                // Switch to groups tab
+                document.querySelector('[data-tab="groups"]').click();
+                setTimeout(() => openGroupRoom(id, name, code), 100);
+            } else {
+                // Switch to dms tab
+                document.querySelector('[data-tab="dms"]').click();
+                setTimeout(() => openDmRoom(id, name), 100);
+            }
+        });
+        container.appendChild(item);
+    }
+
+    // --- Load Groups ---
+    async function loadGroups() {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const groupList = document.getElementById('group-list');
+        groupList.innerHTML = '<div class="loading">読み込み中...</div>';
+
+        try {
+            const q = query(
+                collection(db, 'chats'),
+                where('type', '==', 'group'),
+                where('members', 'array-contains', user.uid)
+            );
+            const snapshot = await getDocs(q);
+
+            groupList.innerHTML = '';
+            if (snapshot.empty) {
+                groupList.innerHTML = '<div class="empty-list">グループがありません</div>';
+                return;
+            }
+
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const displayName = userProfile.nicknames?.[doc.id] || data.name;
+                const item = document.createElement('div');
+                item.className = 'chat-list-item';
+                item.innerHTML = `
+                    <span class="chat-item-icon">👥</span>
+                    <span class="chat-item-name">${displayName}</span>
+                    <span class="chat-item-arrow">→</span>
+                `;
+                item.addEventListener('click', () => openGroupRoom(doc.id, data.name, data.code));
+                groupList.appendChild(item);
+            });
+        } catch (error) {
+            groupList.innerHTML = '<div class="error">エラーが発生しました</div>';
+        }
+    }
+
+    // --- Load DMs ---
+    async function loadDMs() {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const dmList = document.getElementById('dm-list');
+        dmList.innerHTML = '<div class="loading">読み込み中...</div>';
+
+        try {
+            const q = query(
+                collection(db, 'chats'),
+                where('type', '==', 'dm'),
+                where('memberEmails', 'array-contains', user.email.toLowerCase())
+            );
+            const snapshot = await getDocs(q);
+
+            dmList.innerHTML = '';
+            if (snapshot.empty) {
+                dmList.innerHTML = '<div class="empty-list">DMがありません</div>';
+                return;
+            }
+
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const otherEmail = data.memberEmails.find(e => e !== user.email.toLowerCase()) || '不明';
+                const displayName = getDisplayName(otherEmail);
+                const item = document.createElement('div');
+                item.className = 'chat-list-item';
+                item.innerHTML = `
+                    <span class="chat-item-icon">💬</span>
+                    <span class="chat-item-name">${displayName}</span>
+                    <span class="chat-item-arrow">→</span>
+                `;
+                item.addEventListener('click', () => openDmRoom(doc.id, otherEmail));
+                dmList.appendChild(item);
+            });
+        } catch (error) {
+            dmList.innerHTML = '<div class="error">エラーが発生しました</div>';
+        }
+    }
+
+    // --- Open Group Room ---
+    function openGroupRoom(chatId, name, code) {
+        currentChatId = chatId;
+        currentChatType = 'group';
+        currentChatName = name;
+        currentChatCode = code;
+        
+        const displayName = userProfile.nicknames?.[chatId] || name;
+        document.getElementById('group-room-title').textContent = displayName;
+        
+        // Apply background
+        const bgColor = userProfile.chatBackgrounds?.[chatId] || 'default';
+        applyMessageBackground(bgColor);
+        
+        showGroupView('group-room-view');
+        listenForMessages(chatId, 'group');
+    }
+
+    // --- Open DM Room ---
+    function openDmRoom(chatId, otherEmail) {
+        currentChatId = chatId;
+        currentChatType = 'dm';
+        currentChatName = otherEmail;
+        currentChatCode = null;
+        
+        const displayName = getDisplayName(otherEmail);
+        document.getElementById('dm-room-title').textContent = displayName;
+        
+        // Apply background
+        const bgColor = userProfile.chatBackgrounds?.[chatId] || 'default';
+        applyMessageBackground(bgColor);
+        
+        showDmView('dm-room-view');
+        listenForMessages(chatId, 'dm');
+    }
+
+    // --- Listen for Messages ---
+    function listenForMessages(chatId, type) {
+        if (messagesUnsubscribe) messagesUnsubscribe();
+
+        const container = type === 'group' 
+            ? document.getElementById('group-messages-container')
+            : document.getElementById('dm-messages-container');
+
+        const messagesRef = collection(db, 'chats', chatId, 'messages');
+        const q = query(messagesRef, orderBy('createdAt'));
+
+        messagesUnsubscribe = onSnapshot(q, (snapshot) => {
+            container.innerHTML = '';
+            snapshot.forEach(doc => {
+                const message = doc.data();
+                const el = createMessageElement(message, auth.currentUser.uid);
+                container.appendChild(el);
+            });
+            container.scrollTop = container.scrollHeight;
+        });
+    }
+
+    function createMessageElement(message, currentUserId) {
+        const div = document.createElement('div');
+        div.classList.add('message');
+        if (message.userId === currentUserId) div.classList.add('current-user');
+
+        // Use display name or nickname
+        const rawName = message.userName || 'Anonymous';
+        let displayName;
+        if (message.userId === currentUserId) {
+            displayName = userProfile.displayName || rawName.split('@')[0];
+        } else {
+            displayName = getDisplayName(rawName);
+        }
+
+        const text = message.text || '';
+        let dateString = '';
+        if (message.createdAt) {
+            dateString = new Date(message.createdAt.seconds * 1000).toLocaleString();
+        }
+
+        div.innerHTML = `
+            <div class="message-info">
+                <strong>${displayName}</strong> - <span class="timestamp">${dateString}</span>
+            </div>
+            ${text ? `<div class="message-text">${text}</div>` : ''}
+        `;
+        return div;
+    }
+
+    // --- Send Message (Group) ---
+    document.getElementById('group-post-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const textEl = document.getElementById('group-message-text');
+        await sendMessage(textEl);
+    });
+
+    document.getElementById('group-message-text').addEventListener('input', () => {
+        document.getElementById('group-send-button').disabled = document.getElementById('group-message-text').value.trim() === '';
+    });
+
+    // --- Send Message (DM) ---
+    document.getElementById('dm-post-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const textEl = document.getElementById('dm-message-text');
+        await sendMessage(textEl);
+    });
+
+    document.getElementById('dm-message-text').addEventListener('input', () => {
+        document.getElementById('dm-send-button').disabled = document.getElementById('dm-message-text').value.trim() === '';
+    });
+
+    async function sendMessage(textEl) {
+        const text = textEl.value.trim();
+        const user = auth.currentUser;
+        if (!user || !text || !currentChatId) return;
+
+        const userName = userDisplayNameEl.textContent !== '未設定' 
+            ? userDisplayNameEl.textContent 
+            : user.email;
+
+        try {
+            await addDoc(collection(db, 'chats', currentChatId, 'messages'), {
+                text: text,
+                userName: userName,
+                userId: user.uid,
+                createdAt: serverTimestamp()
+            });
+            textEl.value = '';
+        } catch (error) {
+            showAlert('送信エラー: ' + error.message);
+        }
+    }
+
+    // --- Authentication ---
+    onAuthStateChanged(auth, user => {
+        if (user) {
+            loginPrompt.style.display = 'none';
+            appContainer.style.display = 'flex';
+            userEmailEl.textContent = user.email;
+            loadUserProfile();
+            loadRecentChats();
+        } else {
+            appContainer.style.display = 'none';
+            loginPrompt.style.display = 'block';
+        }
+    });
+
+    // --- Account Actions ---
+    document.getElementById('reset-password-btn').addEventListener('click', async () => {
+        const user = auth.currentUser;
+        if (user && user.email) {
+            try {
+                await sendPasswordResetEmail(auth, user.email);
+                showAlert(`${user.email} にパスワードリセットメールを送信しました。`);
+            } catch (error) {
+                showAlert(`エラー: ${error.message}`);
+            }
+        }
+    });
+
+    document.getElementById('logout-btn').addEventListener('click', () => {
+        signOut(auth).catch(error => console.error("Logout error:", error));
+    });
+
+</script>
+{% endblock %}

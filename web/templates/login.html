@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="auth-form">
+    <h1>Login</h1>
+    <form id="login-form">
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <button type="submit">Login</button>
+    </form>
+    <p id="error-message" class="error-message"></p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module">
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const auth = getAuth();
+    const loginForm = document.getElementById('login-form');
+    const errorMessage = document.getElementById('error-message');
+
+    loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        
+        errorMessage.textContent = '';
+
+        signInWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+                // ログイン成功
+                console.log('Login successful:', userCredential.user);
+                window.location.href = '/';
+            })
+            .catch((error) => {
+                console.error('Login error:', error);
+                errorMessage.textContent = error.message;
+            });
+    });
+</script>
+{% endblock %}
