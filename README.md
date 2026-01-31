@@ -1,6 +1,7 @@
 # My Bulletin App
 - iOS版のデザイン
-　- ![64E880F4-EA0E-4568-82E4-27400FF66827_1_201_a](https://github.com/user-attachments/assets/4dc138ad-e1a4-489f-b3b3-6689bccecbc9)
+- ![64E880F4-EA0E-4568-82E4-27400FF66827_1_201_a](https://github.com/user-attachments/assets/6ebad006-c430-4de8-822d-3e005a79406d)
+
 
 
 FlaskベースのWebアプリケーションとSwiftUIベースのiOSアプリで構成される、モダンなチャット掲示板アプリケーションです。
