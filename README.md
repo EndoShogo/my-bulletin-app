@@ -1,6 +1,6 @@
 # My Bulletin App
 - iOS版のデザイン
-- <img src="https://github.com/user-attachments/assets/6ebad006-c430-4de8-822d-3e005a79406d" width="50%">
+- <img src="https://github.com/user-attachments/assets/6ebad006-c430-4de8-822d-3e005a79406d" width="35%">
 
 
 
