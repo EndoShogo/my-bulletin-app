@@ -2,7 +2,7 @@
 - iOS版のデザイン
 
 <img src="https://github.com/user-attachments/assets/6ebad006-c430-4de8-822d-3e005a79406d" width="24%"><img src="https://github.com/user-attachments/assets/b5c2f70f-3561-4ac7-ae7a-999b6c5b4f81" width="24%"><img src="https://github.com/user-attachments/assets/b1f0085a-6bd4-4510-8e84-7655f0ad6cee" width="24%"><img src="https://github.com/user-attachments/assets/cf6a0ecb-248c-45ee-929d-141e874c5594" width="24%">
-
+SwiftUIのMaterial機能を多用した、軽量ながらデザイン性に優れたUI
 FlaskベースのWebアプリケーションとSwiftUIベースのiOSアプリで構成される、モダンなチャット掲示板アプリケーションです。
 Firebase AuthenticationとFirestoreを使用し、クロスプラットフォームでリアルタイムなコミュニケーションを提供します。
 
