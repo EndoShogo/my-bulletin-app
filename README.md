@@ -1,5 +1,5 @@
 # My Bulletin App
-<img width="585" height="1266" alt="64E880F4-EA0E-4568-82E4-27400FF66827" src="https://github.com/user-attachments/assets/8c9f3894-039e-4f62-b7b2-fc479e37fcb5" />
+- <img width="585" height="1266" alt="64E880F4-EA0E-4568-82E4-27400FF66827" src="https://github.com/user-attachments/assets/8c9f3894-039e-4f62-b7b2-fc479e37fcb5" />
 
 
 FlaskベースのWebアプリケーションとSwiftUIベースのiOSアプリで構成される、モダンなチャット掲示板アプリケーションです。
