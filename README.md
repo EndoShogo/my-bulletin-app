@@ -1,5 +1,7 @@
 # My Bulletin App
-![64E880F4-EA0E-4568-82E4-27400FF66827_1_201_a](https://github.com/user-attachments/assets/4dc138ad-e1a4-489f-b3b3-6689bccecbc9)
+- ![64E880F4-EA0E-4568-82E4-27400FF66827_1_201_a](https://github.com/user-attachments/assets/4dc138ad-e1a4-489f-b3b3-6689bccecbc9)
+
+
 FlaskベースのWebアプリケーションとSwiftUIベースのiOSアプリで構成される、モダンなチャット掲示板アプリケーションです。
 Firebase AuthenticationとFirestoreを使用し、クロスプラットフォームでリアルタイムなコミュニケーションを提供します。
 
